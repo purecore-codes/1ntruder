@@ -9,21 +9,30 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const { execSync } = require("child_process");
-
 // --- CONFIGURAÇÕES ---
 
-// Pasta Global (na home do usuário)
-const USER_HOME = os.homedir();
-const GLOBAL_NAMESPACE = ".purecore/atomicbehaviortypes/shared";
-const GLOBAL_SHARED_PATH = path.join(USER_HOME, GLOBAL_NAMESPACE, "shared");
+// Permitir sobreposição via variáveis de ambiente para facilitar testes
+const USER_HOME = process.env.ATOMIC_USER_HOME || os.homedir();
+const GLOBAL_NAMESPACE = process.env.ATOMIC_GLOBAL_NAMESPACE || ".purecore/atomicbehaviortypes/shared";
+const PROJECT_ROOT = process.env.ATOMIC_PROJECT_ROOT || process.cwd();
 
-// Configurações do Projeto Local
-const PROJECT_ROOT = process.cwd();
-const SRC_DIR = path.join(PROJECT_ROOT, "src");
-const LOCAL_TYPES_DIR = path.join(SRC_DIR, "types");
-const LOCAL_SHARED_LINK_DIR = path.join(LOCAL_TYPES_DIR, "shared"); // Onde os symlinks ficarão
-const INDEX_FILE = path.join(LOCAL_TYPES_DIR, "index.ts");
+// Estas variáveis são exportadas para que os testes possam vê-las após a inicialização
+function getConfig() {
+  const userHome = process.env.ATOMIC_USER_HOME || os.homedir();
+  const globalNamespace = process.env.ATOMIC_GLOBAL_NAMESPACE || ".purecore/atomicbehaviortypes/shared";
+  const projectRoot = process.env.ATOMIC_PROJECT_ROOT || process.cwd();
+
+  const srcDir = path.join(projectRoot, "src");
+  const localTypesDir = path.join(srcDir, "types");
+
+  return {
+    GLOBAL_SHARED_PATH: path.join(userHome, globalNamespace, "shared"),
+    SRC_DIR: srcDir,
+    LOCAL_TYPES_DIR: localTypesDir,
+    LOCAL_SHARED_LINK_DIR: path.join(localTypesDir, "shared"),
+    INDEX_FILE: path.join(localTypesDir, "index.ts")
+  };
+}
 
 // Padrão de arquivos de tipos para buscar (ex: user.type.ts ou *.at.ts)
 // Vamos assumir que seus tipos terminam com .type.ts ou .interface.ts
@@ -49,14 +58,21 @@ function ensureDir(dirPath) {
 
 // Varre pastas recursivamente
 function findFiles(dir, suffix, fileList = []) {
+  if (!fs.existsSync(dir)) return fileList;
   const files = fs.readdirSync(dir);
 
   files.forEach((file) => {
     const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+    const stat = fs.lstatSync(filePath);
 
-    // Ignora node_modules e a própria pasta de tipos gerados para evitar loop
-    if (filePath.includes("node_modules") || filePath.includes(LOCAL_TYPES_DIR))
+    // Ignora symlinks para evitar ataques de linkagem e loops circulares
+    if (stat.isSymbolicLink()) {
+      log(`Ignorando link simbólico: ${file}`, "warn");
+      return;
+    }
+
+    // Ignora node_modules
+    if (filePath.includes("node_modules"))
       return;
 
     if (stat.isDirectory()) {
@@ -75,10 +91,11 @@ function findFiles(dir, suffix, fileList = []) {
  * Varre o src, pega os tipos originais e atualiza a Global Store
  */
 function harvestTypes() {
+  const config = getConfig();
   log("Iniciando varredura de tipos locais...", "info");
-  ensureDir(GLOBAL_SHARED_PATH);
+  ensureDir(config.GLOBAL_SHARED_PATH);
 
-  const files = findFiles(SRC_DIR, TYPE_FILE_SUFFIX);
+  const files = findFiles(config.SRC_DIR, TYPE_FILE_SUFFIX);
 
   if (files.length === 0) {
     log("Nenhum arquivo de tipo encontrado para exportar.", "warn");
@@ -88,9 +105,12 @@ function harvestTypes() {
   const processedFiles = [];
 
   files.forEach((filePath) => {
+    // Avoid harvesting from the types dir itself
+    if (filePath.includes(config.LOCAL_TYPES_DIR)) return;
+
     const content = fs.readFileSync(filePath, "utf-8");
     const filename = path.basename(filePath);
-    const globalPath = path.join(GLOBAL_SHARED_PATH, filename);
+    const globalPath = path.join(config.GLOBAL_SHARED_PATH, filename);
 
     // Opcional: Verificar se o conteúdo mudou antes de escrever (hash)
     // Aqui vamos apenas sobrescrever para garantir a versão mais recente
@@ -108,24 +128,27 @@ function harvestTypes() {
  * Baseado no que foi encontrado ou no que já existe na global.
  */
 function linkTypes() {
+  const config = getConfig();
   log("Gerando links simbólicos e index...", "info");
 
   // Limpa e recria a pasta local de links compartilhados
-  if (fs.existsSync(LOCAL_SHARED_LINK_DIR)) {
-    fs.rmSync(LOCAL_SHARED_LINK_DIR, { recursive: true, force: true });
+  if (fs.existsSync(config.LOCAL_SHARED_LINK_DIR)) {
+    fs.rmSync(config.LOCAL_SHARED_LINK_DIR, { recursive: true, force: true });
   }
-  ensureDir(LOCAL_SHARED_LINK_DIR);
+  ensureDir(config.LOCAL_SHARED_LINK_DIR);
 
   // Pega tudo que está na pasta Global
   // (Num cenário real, você filtraria apenas o que o projeto usa lendo os imports)
+  if (!fs.existsSync(config.GLOBAL_SHARED_PATH)) return [];
+
   const globalFiles = fs
-    .readdirSync(GLOBAL_SHARED_PATH)
+    .readdirSync(config.GLOBAL_SHARED_PATH)
     .filter((f) => f.endsWith(TYPE_FILE_SUFFIX));
   const exports = [];
 
   globalFiles.forEach((file) => {
-    const sourcePath = path.join(GLOBAL_SHARED_PATH, file);
-    const destPath = path.join(LOCAL_SHARED_LINK_DIR, file);
+    const sourcePath = path.join(config.GLOBAL_SHARED_PATH, file);
+    const destPath = path.join(config.LOCAL_SHARED_LINK_DIR, file);
 
     try {
       // Cria o Link Simbólico
@@ -153,15 +176,17 @@ function linkTypes() {
  * Cria o arquivo central de exportação
  */
 function generateIndex(exports) {
+  const config = getConfig();
   const header = `/**
  * ARQUIVO GERADO AUTOMATICAMENTE PELO ATOMIC CLI
  * NÃO EDITE MANUALMENTE ESTE ARQUIVO.
- * * Tipos sincronizados de: ${GLOBAL_SHARED_PATH}
+ * * Tipos sincronizados de: ${config.GLOBAL_SHARED_PATH}
  */\n\n`;
 
   const content = header + exports.join("\n");
-  fs.writeFileSync(INDEX_FILE, content);
-  log(`Arquivo de índice gerado em: ${INDEX_FILE}`, "success");
+  ensureDir(path.dirname(config.INDEX_FILE));
+  fs.writeFileSync(config.INDEX_FILE, content);
+  log(`Arquivo de índice gerado em: ${config.INDEX_FILE}`, "success");
 }
 
 // --- EXECUÇÃO ---
@@ -199,13 +224,8 @@ if (typeof module !== 'undefined' && module.exports) {
     generateIndex,
     main,
     // Configuration constants for testing
-    GLOBAL_SHARED_PATH,
-    LOCAL_TYPES_DIR,
-    LOCAL_SHARED_LINK_DIR,
-    INDEX_FILE,
-    TYPE_FILE_SUFFIX,
-    PROJECT_ROOT,
-    SRC_DIR
+    getConfig,
+    TYPE_FILE_SUFFIX
   };
 }
 
