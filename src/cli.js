@@ -49,14 +49,25 @@ function ensureDir(dirPath) {
 
 // Varre pastas recursivamente
 function findFiles(dir, suffix, fileList = []) {
+  // Segurança: Resolve o caminho absoluto e verifica se está dentro do SRC_DIR
+  const absoluteDir = path.resolve(dir);
+  if (!absoluteDir.startsWith(SRC_DIR)) {
+    log(`Tentativa de acesso fora do diretório permitido: ${absoluteDir}`, "warn");
+    return fileList;
+  }
+
   const files = fs.readdirSync(dir);
 
   files.forEach((file) => {
     const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+    const stat = fs.lstatSync(filePath); // Usa lstatSync para detectar symlinks
 
-    // Ignora node_modules e a própria pasta de tipos gerados para evitar loop
-    if (filePath.includes("node_modules") || filePath.includes(LOCAL_TYPES_DIR))
+    // Ignora node_modules, a pasta de tipos gerados e symlinks para evitar loops e escapes
+    if (
+      filePath.includes("node_modules") ||
+      filePath.includes(LOCAL_TYPES_DIR) ||
+      stat.isSymbolicLink()
+    )
       return;
 
     if (stat.isDirectory()) {
@@ -88,8 +99,15 @@ function harvestTypes() {
   const processedFiles = [];
 
   files.forEach((filePath) => {
-    const content = fs.readFileSync(filePath, "utf-8");
     const filename = path.basename(filePath);
+
+    // Segurança: Impede path traversal no nome do arquivo
+    if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+      log(`Nome de arquivo inválido detectado: ${filename}`, "error");
+      return;
+    }
+
+    const content = fs.readFileSync(filePath, "utf-8");
     const globalPath = path.join(GLOBAL_SHARED_PATH, filename);
 
     // Opcional: Verificar se o conteúdo mudou antes de escrever (hash)
@@ -126,6 +144,13 @@ function linkTypes() {
   globalFiles.forEach((file) => {
     const sourcePath = path.join(GLOBAL_SHARED_PATH, file);
     const destPath = path.join(LOCAL_SHARED_LINK_DIR, file);
+
+    // Segurança: Verifica se o sourcePath está realmente dentro de GLOBAL_SHARED_PATH
+    const absoluteSource = path.resolve(sourcePath);
+    if (!absoluteSource.startsWith(GLOBAL_SHARED_PATH)) {
+      log(`Tentativa de linkar arquivo fora do diretório global: ${absoluteSource}`, "error");
+      return;
+    }
 
     try {
       // Cria o Link Simbólico
