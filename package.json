@@ -1,21 +1,29 @@
 {
   "name": "1ntruder",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "bin": {
     "1ntruder": "./src/cli.js",
     "intruder": "./src/cli.js"
   },
   "scripts": {
+    "build": "node ./src/cli.js --banner",
+    "prebuild": "node ./src/cli.js --security-check || true",
+    "postinstall": "node ./src/cli.js --welcome || true",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "1ntruder": "node ./src/cli.js",
-    "intruder": "node ./src/cli.js"
+    "intruder": "node ./src/cli.js",
+    "scan": "node ./src/cli.js scan",
+    "fuzz": "node ./src/cli.js fuzz",
+    "recon": "node ./src/cli.js recon",
+    "start": "node ./src/cli.js"
   },
-  "keywords": ["pentesting", "security", "http", "scanner", "fuzzer"],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["pentesting", "security", "http", "scanner", "fuzzer", "hacking", "cybersecurity"],
+  "author": "PureCore Codes",
+  "license": "MIT",
   "description": "Advanced HTTP security scanner and pentesting toolkit",
   "devDependencies": {
     "jest": "^30.2.0",

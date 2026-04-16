@@ -1,123 +1,205 @@
-<p>
-<img src="https://i.imgur.com/dUqOBQb.png" alt="1ntruder">
-</p>
+# 1ntruder - Advanced HTTP Security Scanner
 
-> **Advanced HTTP Security Scanner & Pentesting Toolkit**
->
-> _"Um toolkit completo para testes de segurança HTTP, incluindo scanner de vulnerabilidades, análise de headers, fuzzing e reconhecimento de tecnologias. Ideal para pentesters, desenvolvedores de segurança e equipes de DevSecOps."_
+<div align="center">
+
+```
+ ██╗███╗   ██╗███████╗████████╗ █████╗ ██╗     ██╗     ███████╗██████╗ 
+ ██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║     ██╔════╝██╔══██╗
+ ██║██╔██╗ ██║███████╗   ██║   ███████║██║     ██║     █████╗  ██████╔╝
+ ██║██║╚██╗██║╚════██║   ██║   ██╔══██║██║     ██║     ██╔══╝  ██╔══██╗
+ ██║██║ ╚████║███████║   ██║   ██║  ██║███████╗███████╗███████╗██║  ██║
+ ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝
+```
+
+**Advanced HTTP Security Scanner & Pentesting Toolkit**
+
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/purecore-codes/1ntruder)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Security](https://img.shields.io/badge/security-audited-brightgreen.svg)](SECURITY_REPORT.md)
+
+</div>
 
 ---
 
-## 📦 Instalação
+## 🚀 Quick Start
 
 ```bash
-# Instalação local (para desenvolvimento)
-cd path/to/1ntruder
-npm i   # ou bun i
+# Install
+npm install 1ntruder
+
+# Run security scan
+npx 1ntruder scan https://example.com
+
+# Fuzz testing
+npx 1ntruder fuzz https://target.com
+
+# Technology reconnaissance
+npx 1ntruder recon https://site.com
 ```
 
-Para usar globalmente (via `npx` ou como comando instalado):
+## 🔥 Features
+
+### 🛡️ Security Scanning
+- **Header Analysis**: Check HSTS, CSP, X-Frame-Options, and 10+ security headers
+- **Vulnerability Detection**: Identify CORS misconfigurations, information disclosure
+- **Redirect Analysis**: Detect redirect chains and potential open redirects
+- **Security Score**: Get a 0-100 score with prioritized recommendations
+
+### 💣 Fuzzing & Attack Simulation
+- **SQL Injection**: Test for common SQLi payloads
+- **XSS Detection**: Cross-site scripting vulnerability tests
+- **Path Traversal**: LFI/RFI and directory traversal attempts
+- **Sensitive Paths**: Enumerate .env, .git, admin panels, backups
+
+### 🔍 Reconnaissance
+- **Tech Stack Detection**: Identify 25+ technologies (WordPress, React, Nginx, etc.)
+- **Link Extraction**: Discover forms, endpoints, and external resources
+- **Cookie Analysis**: Check security flags (HttpOnly, Secure, SameSite)
+- **Server Fingerprinting**: Extract server software and version info
+
+### ⚡ Advanced HTTP Client
+- **Automatic Retries**: Configurable retry with exponential backoff
+- **Request Logging**: Detailed logs for debugging and auditing
+- **Batch Requests**: Execute multiple requests efficiently
+- **Pattern Matching**: Detect content anomalies and patterns
+
+## 📦 Installation
 
 ```bash
-# Instalação global (opcional)
-npm i -g .   # ou bun i -g .
+npm install 1ntruder
+# or
+yarn add 1ntruder
+# or
+bun add 1ntruder
 ```
 
-Depois disso os seguintes comandos estarão disponíveis:
+## 💻 Usage
 
-- `1ntruder`
-- `intruder`
+### CLI Commands
 
-## 🛠️ Funcionalidades Principais
+```bash
+# Full security scan
+npx 1ntruder scan https://example.com
 
-- **HTTP Security Scanner**: Varredura completa de URLs em busca de vulnerabilidades
-- **Header Analyzer**: Análise detalhada de headers de segurança com score e recomendações
-- **HTTP Fuzzer**: Testes automatizados de SQL Injection, XSS, Path Traversal e mais
-- **Technology Reconnaissance**: Detecção de 25+ tecnologias (WordPress, React, Nginx, etc.)
-- **Advanced HTTP Client**: Cliente HTTP com retry automático, logging e métricas
+# Deep scan with all checks
+npx 1ntruder scan https://example.com --depth=deep
 
-## 🚀 Como funciona
+# Basic fuzzing
+npx 1ntruder fuzz https://target.com
 
-1. **Scan** – o `HttpScanner` analisa URLs em busca de vulnerabilidades e configurações inseguras
-2. **Analyze** – o `HttpHeaderAnalyzer` avalia headers de segurança e gera scores
-3. **Fuzz** – o `HttpFuzzer` testa entradas maliciosas para detectar falhas
-4. **Recon** – o `HttpRecon` identifica tecnologias e coleta informações do alvo
-5. **Execução** – ao rodar `1ntruder` (ou `intruder`) você acessa todas as ferramentas de pentesting
+# Custom payload fuzzing
+npx 1ntruder fuzz https://target.com --payloads=custom
 
-## 🎮 Como usar
+# Technology reconnaissance
+npx 1ntruder recon https://site.com
 
-### Via Código TypeScript
+# Header analysis only
+npx 1ntruder headers https://example.com
+
+# Show help
+npx 1ntruder --help
+```
+
+### NPM Scripts
+
+```json
+{
+  "scripts": {
+    "build": "npm run 1ntruder",
+    "scan": "1ntruder scan <url>",
+    "fuzz": "1ntruder fuzz <url>",
+    "recon": "1ntruder recon <url>"
+  }
+}
+```
+
+### Programmatic Usage
 
 ```typescript
 import { HttpScanner, HttpFuzzer, AdvancedHttpClient } from '1ntruder';
 
-// Scanner de segurança
+// Security Scan
 const scanner = new HttpScanner();
 const result = await scanner.scan({
   url: 'https://example.com',
   scanDepth: 'deep'
 });
-
-console.log('Vulnerabilidades:', result.vulnerabilities);
-console.log('Headers de segurança:', result.securityHeaders);
+console.log(`Security Score: ${result.score}/100`);
 
 // Fuzzing
-const fuzzer = new HttpFuzzer(new AdvancedHttpClient().getInstance());
-const vulns = await fuzzer.performBasicFuzzing('https://target.com');
+const client = new AdvancedHttpClient();
+const fuzzer = new HttpFuzzer(client.getInstance());
+const vulnerabilities = await fuzzer.performBasicFuzzing('https://target.com');
 
-// Cliente HTTP avançado
-const client = new AdvancedHttpClient({ logRequests: true, retryCount: 3 });
-const response = await client.get('https://api.example.com');
+// Advanced HTTP Client
+const httpClient = new AdvancedHttpClient({
+  logRequests: true,
+  retryCount: 3,
+  timeout: 10000
+});
+const response = await httpClient.get('https://api.example.com');
 ```
 
-### Via CLI (em desenvolvimento)
+## 🔒 Security Checks Performed
 
-```bash
-# Scan rápido
-1ntruder scan https://example.com
+| Category | Checks |
+|----------|--------|
+| **Headers** | HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy |
+| **Vulnerabilities** | CORS Misconfiguration, Information Disclosure, Dangerous HTTP Methods |
+| **Fuzzing** | SQL Injection, XSS, Path Traversal, Command Injection |
+| **Recon** | Technology Detection, Server Fingerprinting, Cookie Analysis |
 
-# Scan profundo
-1ntruder scan --deep https://example.com
-
-# Fuzzing básico
-1ntruder fuzz https://target.com
-```
-
-## 📁 Estrutura do Projeto
+## 📊 Example Output
 
 ```
-1ntruder/
-├── src/
-│   ├── pentest/
-│   │   ├── http-scanner.ts       # Scanner principal
-│   │   ├── header-analyzer.ts    # Análise de headers
-│   │   ├── fuzzer.ts             # Testes de fuzzing
-│   │   ├── recon.ts              # Reconhecimento
-│   │   └── index.ts              # Exports
-│   ├── http/
-│   │   └── advanced-client.ts    # Cliente HTTP avançado
-│   └── index.ts                  # Entry point
-├── examples/
-│   └── pentest-example.ts        # Exemplos de uso
-├── test/                         # Testes unitários
-├── PENTEST_GUIDE.md              # Guia completo
-└── SECURITY_REPORT.md            # Relatório de segurança
+[1ntruder] Scanning https://example.com...
+[1ntruder] ✓ HSTS header present
+[1ntruder] ✓ CSP header configured
+[1ntruder] ⚠ X-Frame-Options missing
+[1ntruder] ⚠ CORS allows all origins
+[1ntruder] Security Score: 78/100
+
+Recommendations:
+  [HIGH] Add X-Frame-Options header
+  [MEDIUM] Restrict CORS origins
+  [LOW] Consider adding Permissions-Policy
 ```
 
-## 🔒 Segurança
+## ⚠️ Disclaimer
 
-O 1ntruder utiliza **axios 1.15.0** (última versão), que inclui correções para todas as CVEs conhecidas:
-- ✅ CVE-2023-45857 (CSRF Exposure)
-- ✅ CVE-2021-3749 (ReDoS)
-- ✅ CVE-2020-28168 (SSRF)
-- ✅ CVE-2019-10742 (Prototype Pollution)
+**This tool is for educational and authorized security testing only.**
 
-Execute `npm audit` para verificar vulnerabilidades.
+- Only use on systems you own or have explicit permission to test
+- Unauthorized access to computer systems is illegal
+- The authors are not responsible for misuse of this tool
+- Always follow responsible disclosure practices
 
-## 📄 Licença
+## 📄 License
 
-ISC
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Abra issues e pull requests no repositório.
+Contributions welcome! Please read our contributing guidelines before submitting PRs.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/purecore-codes/1ntruder/issues)
+- **Documentation**: [PENTEST_GUIDE.md](PENTEST_GUIDE.md)
+- **Security Reports**: [SECURITY_REPORT.md](SECURITY_REPORT.md)
+
+---
+
+<div align="center">
+
+**Made with 🔒 by PureCore Codes**
+
+*Simule o ataque antes que eles o façam.*
+
+</div>
