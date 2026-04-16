@@ -2,66 +2,69 @@
 # Dependencies
 node_modules/
 
-# Build outputs
+# Build artifacts
 dist/
 build/
 target/
 
-# TypeScript
-*.tsbuildinfo
-*.js.map
-*.d.ts
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Python (if applicable)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
+*.py.class
+*.py.obj
+*.py.out
+
+# Virtual environments
 venv/
 .venv/
-.venv.bak/
-pip-log.txt
-pip-delete-this-directory.txt
+env/
+.env/
 
-# Coverage
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 *.coverage
 
-# Testing
-.nyc_output/
+# Environment variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# MyPy cache
 .mypy_cache/
+__pycache__/
+
+# Pytest cache
 .pytest_cache/
-.tox/
-.hypothesis/
 
-# OS
-.DS_Store
-Thumbs.db
+# Gradle
+.gradle/
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.backup
-
-# Archives
+# Compressed files
 *.zip
 *.gz
 *.tar

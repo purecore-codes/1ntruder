@@ -51,7 +51,7 @@ export class AdvancedHttpClient {
       maxRedirects: this.options.followRedirects ? this.options.maxRedirects : 0,
       validateStatus: () => true,
       headers: {
-        'User-Agent': 'OneTyper4All-HTTPClient/1.0',
+        'User-Agent': '1ntruder-HTTPClient/1.0',
         ...options?.headers,
       },
     });

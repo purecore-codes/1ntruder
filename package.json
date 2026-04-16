@@ -1,26 +1,30 @@
 {
-  "name": "one-typer-4-all",
+  "name": "1ntruder",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "bin": {
-    "one-typer-4-all": "./src/cli.js",
-    "mytyper": "./src/cli.js",
-    "onetyper": "./src/cli.js",
-    "onetyper4all": "./src/cli.js"
+    "1ntruder": "./src/cli.js",
+    "intruder": "./src/cli.js"
   },
   "scripts": {
+    "build": "node ./src/cli.js --banner",
+    "prebuild": "node ./src/cli.js --security-check || true",
+    "postinstall": "node ./src/cli.js --welcome || true",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "one-typer-4-all": "node ./src/cli.js",
-    "mytyper": "node ./src/cli.js",
-    "onetyper": "node ./src/cli.js",
-    "onetyper4all": "node ./src/cli.js"
+    "1ntruder": "node ./src/cli.js",
+    "intruder": "node ./src/cli.js",
+    "scan": "node ./src/cli.js scan",
+    "fuzz": "node ./src/cli.js fuzz",
+    "recon": "node ./src/cli.js recon",
+    "start": "node ./src/cli.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["pentesting", "security", "http", "scanner", "fuzzer", "hacking", "cybersecurity"],
+  "author": "PureCore Codes",
+  "license": "MIT",
+  "description": "Advanced HTTP security scanner and pentesting toolkit",
   "devDependencies": {
     "jest": "^30.2.0",
     "typescript": "^6.0.2"
