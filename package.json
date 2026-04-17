@@ -5,7 +5,9 @@
   "types": "src/index.ts",
   "bin": {
     "1ntruder": "./src/cli.js",
-    "intruder": "./src/cli.js"
+    "intruder": "./src/cli.js",
+    "1ntruder-cve": "./src/cli-cve.js",
+    "intruder-cve": "./src/cli-cve.js"
   },
   "scripts": {
     "build": "node ./src/cli.js --banner",
@@ -19,12 +21,19 @@
     "scan": "node ./src/cli.js scan",
     "fuzz": "node ./src/cli.js fuzz",
     "recon": "node ./src/cli.js recon",
-    "start": "node ./src/cli.js"
+    "start": "node ./src/cli.js",
+    "cve": "node ./src/cli-cve.js cve",
+    "deps": "node ./src/cli-cve.js deps",
+    "cve:search": "node ./src/cli-cve.js cve search",
+    "cve:recent": "node ./src/cli-cve.js cve recent",
+    "cve:critical": "node ./src/cli-cve.js cve critical",
+    "cve:monitor": "node ./src/cli-cve.js cve monitor",
+    "cve:report": "node ./src/cli-cve.js cve report"
   },
-  "keywords": ["pentesting", "security", "http", "scanner", "fuzzer", "hacking", "cybersecurity"],
+  "keywords": ["pentesting", "security", "http", "scanner", "fuzzer", "hacking", "cybersecurity", "cve", "vulnerability"],
   "author": "PureCore Codes",
   "license": "MIT",
-  "description": "Advanced HTTP security scanner and pentesting toolkit",
+  "description": "Advanced HTTP security scanner and pentesting toolkit with CVE monitoring",
   "devDependencies": {
     "jest": "^30.2.0",
     "typescript": "^6.0.2"
